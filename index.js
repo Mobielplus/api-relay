@@ -7,11 +7,10 @@ const axios = require('axios');
 const app = express();
 app.use(bodyParser.json());
 
-// Add request logging middleware - logs every request to any endpoint
+// Add request logging middleware - logs every request to any endpoint (with simplified output)
 app.use((req, res, next) => {
   const timestamp = new Date().toISOString();
   console.log(`[${timestamp}] ${req.method} request to ${req.url} from ${req.ip}`);
-  console.log('Headers:', JSON.stringify(req.headers));
   
   // For POST requests, log the body
   if (req.method === 'POST' && req.body) {
