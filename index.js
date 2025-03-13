@@ -7,6 +7,25 @@ const axios = require('axios');
 const app = express();
 app.use(bodyParser.json());
 
+// Add request logging middleware - logs every request to any endpoint
+app.use((req, res, next) => {
+  const timestamp = new Date().toISOString();
+  console.log(`[${timestamp}] ${req.method} request to ${req.url} from ${req.ip}`);
+  console.log('Headers:', JSON.stringify(req.headers));
+  
+  // For POST requests, log the body
+  if (req.method === 'POST' && req.body) {
+    console.log('Body:', JSON.stringify(req.body));
+  }
+  
+  // For GET requests, log the query parameters
+  if (req.method === 'GET' && Object.keys(req.query).length > 0) {
+    console.log('Query params:', JSON.stringify(req.query));
+  }
+  
+  next();
+});
+
 // Get configurations from environment variables
 const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
 const RETOOL_WEBHOOK_URL = process.env.RETOOL_WEBHOOK_URL;
