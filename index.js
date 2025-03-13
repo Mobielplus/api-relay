@@ -69,12 +69,20 @@ app.post('/api/webhook', async (req, res) => {
         }
       );
       
-      console.log('Forwarded to Retool, response:', response.status);
+      // Log the complete response from Retool
+      console.log('Retool response status:', response.status);
+      console.log('Retool response headers:', JSON.stringify(response.headers));
+      console.log('Retool response data:', JSON.stringify(response.data));
       
       // Return a '200 OK' response to acknowledge receipt of the event
       res.status(200).send('EVENT_RECEIVED');
     } catch (error) {
       console.error('Error forwarding to Retool:', error.message);
+      if (error.response) {
+        // Log the error response from Retool
+        console.error('Retool error status:', error.response.status);
+        console.error('Retool error data:', JSON.stringify(error.response.data));
+      }
       // Still return 200 to Meta so they don't retry (which could cause duplicate events)
       res.status(200).send('EVENT_RECEIVED_BUT_PROCESSING_FAILED');
     }
