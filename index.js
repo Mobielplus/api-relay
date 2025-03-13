@@ -7,10 +7,10 @@ const axios = require('axios');
 const app = express();
 app.use(bodyParser.json());
 
-// Your configurations
-const VERIFY_TOKEN = "YOUR_CUSTOM_VERIFY_TOKEN"; // Create a random string for this
-const RETOOL_WEBHOOK_URL = "https://api.retool.com/v1/workflows/7b9529d0-06ef-4d1c-846b-d78c395a4e0a/startTrigger";
-const RETOOL_API_KEY = "retool_wk_0d7378044d434840857179562bd33a09";
+// Get configurations from environment variables
+const VERIFY_TOKEN = process.env.VERIFY_TOKEN;
+const RETOOL_WEBHOOK_URL = process.env.RETOOL_WEBHOOK_URL;
+const RETOOL_API_KEY = process.env.RETOOL_API_KEY;
 
 // Handle GET requests for Meta webhook verification
 app.get('/api/webhook', (req, res) => {
@@ -46,6 +46,17 @@ app.post('/api/webhook', async (req, res) => {
   // Check if this is an event from a page subscription
   if (body.object) {
     try {
+      // Check if required environment variables are configured
+      if (!RETOOL_API_KEY) {
+        console.error('RETOOL_API_KEY is not configured');
+        return res.status(500).send('SERVER_CONFIGURATION_ERROR');
+      }
+      
+      if (!RETOOL_WEBHOOK_URL) {
+        console.error('RETOOL_WEBHOOK_URL is not configured');
+        return res.status(500).send('SERVER_CONFIGURATION_ERROR');
+      }
+
       // Forward the webhook payload to Retool
       const response = await axios.post(
         RETOOL_WEBHOOK_URL,
@@ -78,11 +89,13 @@ app.get('/', (req, res) => {
   res.send('Meta to Retool Webhook Middleware is running!');
 });
 
-// Listen for requests
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+// For local development
+if (process.env.NODE_ENV !== 'production') {
+  const PORT = process.env.PORT || 3000;
+  app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+  });
+}
 
 // For Vercel serverless deployment
 module.exports = app;
